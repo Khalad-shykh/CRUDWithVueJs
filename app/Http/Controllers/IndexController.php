@@ -11,7 +11,13 @@ class IndexController extends Controller
         return view("index");
     }
     public function add(Request $req){
-
+        $req->validate(
+            [
+'car_name' => 'required',
+'car_price' => 'required',
+'car_model' => 'required'
+            ]
+            );
         $result = DB::table("cars")->insert([
             "car_name" => $req->car_name,
             "car_price" => $req->car_price,

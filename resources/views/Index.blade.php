@@ -14,28 +14,23 @@
 <div class="container" id="app">
 <div class="col-md-6 offset-3">
     <h1 class="text-center">Enter Your Car Details</h1>
-
     {{-- BS Alert --}}
 
-    <div class="modal-body">
-        <div class="alert alert-warning" role="alert" v-for="error in errors" id="err-title" :key="error">
-            <i class="mdi mdi-block-helper mr-2"></i>
-            <span>@{{error}}</span>
-        </div>
-        {{-- BS Alert End --}}
 
     <div class="form-group">
-        <input type="text" class="form-control" v-model="item.car_name" name="" id="" placeholder="Enter Car Name">
+        <input type="text" class="form-control" v-model="item.car_name" name="car_name" id="" placeholder="Enter Car Name">
+        <span v-if="errors.car_name" :class="['text-danger']">@{{errors.car_name[0]}}</span>
     </div>
       <div class="form-group">
-          <input type="number" class="form-control" v-model="item.car_price" name="" id="" placeholder="Enter Car Price">
+          <input type="number" class="form-control" v-model="item.car_price" name="car_price" id="" placeholder="Enter Car Price">
+          <span v-if="errors.car_price" :class="['text-danger']">@{{errors.car_price[0]}}</span>
         </div>
       <div class="form-group">
-          <input type="text" class="form-control" v-model="item.car_model" name="" id="" placeholder="Enter Car Model">
+          <input type="text" class="form-control" v-model="item.car_model" name="car_model" id="" placeholder="Enter Car Model">
+          <span v-if="errors.car_model" :class="['text-danger']">@{{errors.car_model[0]}}</span>
         </div>
       <button class="btn btn-primary" @click="save" >Save</button>
-</div>
-</div>
+    </div>
 <table class="table">
     <thead>
         <tr>
@@ -47,7 +42,7 @@
         </tr>
     </thead>
     <tbody>
-        <tr v-for="list in cars">
+        <tr v-if="cars.length > 0" v-for="list in cars" :key="list.id">
             <td>@{{list.id}}</td>
             <td>@{{list.car_name}}</td>
             <td>@{{list.car_price}} .$</td>
@@ -90,7 +85,7 @@
     </div>
 </div>
 <script src="{{asset("js/jQuery.js")}}"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="{{asset("js/bootstrap.min.js")}}" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </div>
 <script>
 
@@ -100,41 +95,31 @@ this.LoadData();
     },
     data(){
     return {
-        errors:[],
         cars:[],
         item:{
             car_name: "",
             car_price:"",
             car_model:""
         },
+        errors:[],
     }
     },
 methods:{
         LoadData(){
             axios.get("/show").then((response) => {
                     this.cars = response.data.cars;
+                    console.log(this.cars);
                 })
         },
     save(){
-        this.errors = [];
-        if(!this.item.car_name){
-            this.errors.push("Car Name Is Requied");
-        }
-        if(!this.item.car_price){
-            this.errors.push("Car Price Is Requied");
-        }
-        if(!this.item.car_model){
-            this.errors.push("Car Model Is Requied");
-        }
-        if(this.errors.length == 0){
             axios.post('/Index',this.item).then((response) => {
             if(response.status == 200){
                 alert("Data Added Successfully");
                 this.LoadData();
-            }}).catch((response) => {
-            console.log(response);
+            }}).catch((error) => {
+                this.errors = error.response.data.errors;
+            console.log(this.errors);
         })
-        }
     },
     edit(list){
         this.item = {
